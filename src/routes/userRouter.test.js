@@ -1,6 +1,6 @@
 const request = require('supertest');
 const app = require('../service.js');
-const { createAdminUser, registerUser } = require('./authRouter.test.js');
+const { createAdminUser, registerUser } = require('../testHelpers.js');
 
 if (process.env.VSCODE_INSPECTOR_OPTIONS) {
   jest.setTimeout(60 * 1000 * 5);

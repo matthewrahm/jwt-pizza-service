@@ -6,7 +6,7 @@
   "scripts": {
     "start": "cd src && node index.js",
     "lint": "eslint src",
-    "test": "jest --coverage --coverageReporters json-summary text"
+    "test": "jest --coverage"
   },
   "license": "MIT",
   "dependencies": {
@@ -22,11 +22,16 @@
         "lines": 80
       }
     },
+    "coverageReporters": [
+      "json-summary",
+      "text"
+    ],
     "collectCoverageFrom": [
       "src/**/*.js",
       "!src/index.js",
       "!src/init.js",
-      "!src/config.js"
+      "!src/config.js",
+      "!src/testHelpers.js"
     ]
   },
   "devDependencies": {

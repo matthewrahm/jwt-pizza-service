@@ -1,13 +1,9 @@
 const request = require('supertest');
 const app = require('../service.js');
-const { createAdminUser, registerUser } = require('./authRouter.test.js');
+const { createAdminUser, registerUser, randomName } = require('../testHelpers.js');
 
 if (process.env.VSCODE_INSPECTOR_OPTIONS) {
   jest.setTimeout(60 * 1000 * 5);
-}
-
-function randomName() {
-  return Math.random().toString(36).substring(2, 12);
 }
 
 describe('franchise router', () => {
