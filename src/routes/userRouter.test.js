@@ -49,15 +49,46 @@ describe('user router', () => {
     expect(res.status).toBe(200);
   });
 
-  test('delete user (not implemented)', async () => {
-    const res = await request(app).delete(`/api/user/${user.id}`).set('Authorization', `Bearer ${token}`);
-    expect(res.status).toBe(200);
-    expect(res.body.message).toBe('not implemented');
+  test('list users unauthorized', async () => {
+    const res = await request(app).get('/api/user/').set('Authorization', `Bearer ${token}`);
+    expect(res.status).toBe(403);
+    expect(res.body.message).toBe('unauthorized');
   });
 
-  test('list users (not implemented)', async () => {
-    const res = await request(app).get('/api/user/').set('Authorization', `Bearer ${token}`);
+  test('list users as admin', async () => {
+    const [, adminToken] = await createAdminUser();
+    const res = await request(app).get('/api/user/').set('Authorization', `Bearer ${adminToken}`);
     expect(res.status).toBe(200);
-    expect(res.body.message).toBe('not implemented');
+    expect(res.body.users).toBeDefined();
+    expect(Array.isArray(res.body.users)).toBe(true);
+    expect(res.body.more).toBeDefined();
+  });
+
+  test('list users with pagination', async () => {
+    const [, adminToken] = await createAdminUser();
+    const res = await request(app).get('/api/user/?page=0&limit=5').set('Authorization', `Bearer ${adminToken}`);
+    expect(res.status).toBe(200);
+    expect(res.body.users.length).toBeLessThanOrEqual(5);
+  });
+
+  test('list users with name filter', async () => {
+    const [, adminToken] = await createAdminUser();
+    const res = await request(app).get('/api/user/?name=*').set('Authorization', `Bearer ${adminToken}`);
+    expect(res.status).toBe(200);
+    expect(res.body.users).toBeDefined();
+  });
+
+  test('delete user unauthorized', async () => {
+    const res = await request(app).delete(`/api/user/${user.id}`).set('Authorization', `Bearer ${token}`);
+    expect(res.status).toBe(403);
+    expect(res.body.message).toBe('unauthorized');
+  });
+
+  test('delete user as admin', async () => {
+    const [userToDelete] = await registerUser();
+    const [, adminToken] = await createAdminUser();
+    const res = await request(app).delete(`/api/user/${userToDelete.id}`).set('Authorization', `Bearer ${adminToken}`);
+    expect(res.status).toBe(200);
+    expect(res.body.message).toBe('user deleted');
   });
 });
