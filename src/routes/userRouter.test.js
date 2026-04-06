@@ -1,6 +1,6 @@
 const request = require('supertest');
 const app = require('../service.js');
-const { createAdminUser, registerUser } = require('../testHelpers.js');
+const { createAdminUser, registerUser, randomName } = require('../testHelpers.js');
 
 if (process.env.VSCODE_INSPECTOR_OPTIONS) {
   jest.setTimeout(60 * 1000 * 5);
@@ -19,8 +19,13 @@ describe('user router', () => {
     expect(res.body.email).toBe(user.email);
   });
 
-  test('update user', async () => {
-    const newEmail = 'updated_' + user.email;
+  test('get current user unauthorized', async () => {
+    const res = await request(app).get('/api/user/me');
+    expect(res.status).toBe(401);
+  });
+
+  test('update user email and password', async () => {
+    const newEmail = 'updated_' + randomName() + '@test.com';
     const res = await request(app)
       .put(`/api/user/${user.id}`)
       .set('Authorization', `Bearer ${token}`)
@@ -31,13 +36,33 @@ describe('user router', () => {
     user = res.body.user;
   });
 
-  test('update user unauthorized', async () => {
+  test('update user name only', async () => {
+    const newName = 'name_' + randomName();
+    const res = await request(app)
+      .put(`/api/user/${user.id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ name: newName, email: user.email, password: 'a' });
+    expect(res.status).toBe(200);
+    expect(res.body.user.name).toBe(newName);
+    token = res.body.token;
+    user = res.body.user;
+  });
+
+  test('update user unauthorized (different user)', async () => {
     const [otherUser] = await registerUser();
     const res = await request(app)
       .put(`/api/user/${otherUser.id}`)
       .set('Authorization', `Bearer ${token}`)
       .send({ email: 'hacker@test.com' });
     expect(res.status).toBe(403);
+    expect(res.body.message).toBe('unauthorized');
+  });
+
+  test('update user not logged in', async () => {
+    const res = await request(app)
+      .put(`/api/user/${user.id}`)
+      .send({ email: 'new@test.com' });
+    expect(res.status).toBe(401);
   });
 
   test('admin can update any user', async () => {
@@ -49,10 +74,15 @@ describe('user router', () => {
     expect(res.status).toBe(200);
   });
 
-  test('list users unauthorized', async () => {
+  test('list users unauthorized (non-admin)', async () => {
     const res = await request(app).get('/api/user/').set('Authorization', `Bearer ${token}`);
     expect(res.status).toBe(403);
     expect(res.body.message).toBe('unauthorized');
+  });
+
+  test('list users not logged in', async () => {
+    const res = await request(app).get('/api/user/');
+    expect(res.status).toBe(401);
   });
 
   test('list users as admin', async () => {
@@ -62,6 +92,10 @@ describe('user router', () => {
     expect(res.body.users).toBeDefined();
     expect(Array.isArray(res.body.users)).toBe(true);
     expect(res.body.more).toBeDefined();
+    // Each user should have roles
+    if (res.body.users.length > 0) {
+      expect(res.body.users[0].roles).toBeDefined();
+    }
   });
 
   test('list users with pagination', async () => {
@@ -78,10 +112,15 @@ describe('user router', () => {
     expect(res.body.users).toBeDefined();
   });
 
-  test('delete user unauthorized', async () => {
+  test('delete user unauthorized (non-admin)', async () => {
     const res = await request(app).delete(`/api/user/${user.id}`).set('Authorization', `Bearer ${token}`);
     expect(res.status).toBe(403);
     expect(res.body.message).toBe('unauthorized');
+  });
+
+  test('delete user not logged in', async () => {
+    const res = await request(app).delete(`/api/user/${user.id}`);
+    expect(res.status).toBe(401);
   });
 
   test('delete user as admin', async () => {

@@ -15,11 +15,26 @@ describe('service endpoints', () => {
     expect(res.body.version).toBeDefined();
     expect(res.body.endpoints).toBeDefined();
     expect(res.body.config).toBeDefined();
+    expect(res.body.config.factory).toBeDefined();
+    expect(res.body.config.db).toBeDefined();
   });
 
   test('unknown endpoint', async () => {
     const res = await request(app).get('/api/invalid');
     expect(res.status).toBe(404);
     expect(res.body.message).toBe('unknown endpoint');
+  });
+
+  test('unknown non-api endpoint', async () => {
+    const res = await request(app).get('/totally/bogus');
+    expect(res.status).toBe(404);
+    expect(res.body.message).toBe('unknown endpoint');
+  });
+
+  test('CORS headers are set', async () => {
+    const res = await request(app).get('/').set('Origin', 'http://example.com');
+    expect(res.headers['access-control-allow-origin']).toBeDefined();
+    expect(res.headers['access-control-allow-methods']).toContain('GET');
+    expect(res.headers['access-control-allow-headers']).toContain('Authorization');
   });
 });
