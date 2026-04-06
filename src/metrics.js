@@ -23,6 +23,9 @@ class Metrics {
     this.pizzaLatencySum = 0;
     this.pizzaLatencyCount = 0;
 
+    this.previousCpuUsage = process.cpuUsage();
+    this.previousCpuTime = Date.now();
+
     this.sendMetricsPeriodically(10000);
   }
 
@@ -86,8 +89,14 @@ class Metrics {
   }
 
   getCpuUsagePercentage() {
-    const cpuUsage = os.loadavg()[0] / os.cpus().length;
-    return (cpuUsage * 100).toFixed(2);
+    const currentCpuUsage = process.cpuUsage(this.previousCpuUsage);
+    const currentTime = Date.now();
+    const elapsedMs = currentTime - this.previousCpuTime;
+    const elapsedMicros = elapsedMs * 1000;
+    const cpuPercent = ((currentCpuUsage.user + currentCpuUsage.system) / elapsedMicros) * 100;
+    this.previousCpuUsage = process.cpuUsage();
+    this.previousCpuTime = currentTime;
+    return cpuPercent.toFixed(2);
   }
 
   getMemoryUsagePercentage() {
