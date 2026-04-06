@@ -26,7 +26,7 @@
       "type": "row"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "datasource": { "type": "prometheus", "uid": "grafanacloud-prom" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -81,7 +81,7 @@
       "type": "timeseries"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "datasource": { "type": "prometheus", "uid": "grafanacloud-prom" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
@@ -119,7 +119,7 @@
       "type": "row"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "datasource": { "type": "prometheus", "uid": "grafanacloud-prom" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -158,7 +158,7 @@
       "type": "timeseries"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "datasource": { "type": "prometheus", "uid": "grafanacloud-prom" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
@@ -193,7 +193,7 @@
       "type": "gauge"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "datasource": { "type": "prometheus", "uid": "grafanacloud-prom" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
@@ -235,7 +235,7 @@
       "type": "row"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "datasource": { "type": "prometheus", "uid": "grafanacloud-prom" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -274,7 +274,7 @@
       "type": "timeseries"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "datasource": { "type": "prometheus", "uid": "grafanacloud-prom" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -308,7 +308,7 @@
       "type": "timeseries"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "datasource": { "type": "prometheus", "uid": "grafanacloud-prom" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
@@ -345,7 +345,7 @@
       "type": "row"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "datasource": { "type": "prometheus", "uid": "grafanacloud-prom" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -386,22 +386,7 @@
   ],
   "schemaVersion": 39,
   "tags": ["jwt-pizza"],
-  "templating": {
-    "list": [
-      {
-        "current": {},
-        "hide": 0,
-        "includeAll": false,
-        "label": "Prometheus",
-        "multi": false,
-        "name": "DS_PROMETHEUS",
-        "options": [],
-        "query": "prometheus",
-        "refresh": 1,
-        "type": "datasource"
-      }
-    ]
-  },
+  "templating": { "list": [] },
   "time": { "from": "now-1h", "to": "now" },
   "timepicker": {},
   "timezone": "",
