@@ -276,14 +276,16 @@ describe('Metrics', () => {
   describe('sendMetricsToGrafana', () => {
     test('sends metrics via fetch when apiKey is configured', async () => {
       global.fetch = jest.fn(() => Promise.resolve({ ok: true }));
-      metrics.sendMetricsToGrafana('test_metric value=1');
+      const testData = { resourceMetrics: [] };
+      metrics.sendMetricsToGrafana(testData);
       expect(global.fetch).toHaveBeenCalledWith(
         'http://test-grafana/api/v1/push',
         expect.objectContaining({
           method: 'POST',
-          body: 'test_metric value=1',
+          body: JSON.stringify(testData),
           headers: expect.objectContaining({
-            Authorization: 'Bearer test-account-id:test-api-key',
+            'Content-Type': 'application/json',
+            Authorization: `Basic ${Buffer.from('test-account-id:test-api-key').toString('base64')}`,
           }),
         })
       );
@@ -292,7 +294,7 @@ describe('Metrics', () => {
     test('handles fetch failure gracefully', async () => {
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
       global.fetch = jest.fn(() => Promise.resolve({ ok: false, status: 500, statusText: 'Server Error' }));
-      metrics.sendMetricsToGrafana('test_metric value=1');
+      metrics.sendMetricsToGrafana({ resourceMetrics: [] });
       await Promise.resolve();
       await Promise.resolve();
       expect(consoleSpy).toHaveBeenCalledWith('Failed to push metrics:', 500, 'Server Error');
@@ -302,7 +304,7 @@ describe('Metrics', () => {
     test('handles fetch network error gracefully', async () => {
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
       global.fetch = jest.fn(() => Promise.reject(new Error('network error')));
-      metrics.sendMetricsToGrafana('test_metric value=1');
+      metrics.sendMetricsToGrafana({ resourceMetrics: [] });
       await Promise.resolve();
       await Promise.resolve();
       expect(consoleSpy).toHaveBeenCalledWith('Error pushing metrics:', expect.any(Error));
@@ -314,7 +316,7 @@ describe('Metrics', () => {
       const origKey = config.metrics.apiKey;
       config.metrics.apiKey = '';
       global.fetch = jest.fn();
-      metrics.sendMetricsToGrafana('test_metric value=1');
+      metrics.sendMetricsToGrafana({ resourceMetrics: [] });
       expect(global.fetch).not.toHaveBeenCalled();
       config.metrics.apiKey = origKey;
     });
@@ -327,9 +329,11 @@ describe('Metrics', () => {
       metrics.trackActiveUser(1);
       jest.advanceTimersByTime(10000);
       expect(global.fetch).toHaveBeenCalled();
-      const body = global.fetch.mock.calls[0][1].body;
-      expect(body).toContain('request,source=test-source');
-      expect(body).toContain('value=5');
+      const body = JSON.parse(global.fetch.mock.calls[0][1].body);
+      expect(body.resourceMetrics).toBeDefined();
+      const allMetrics = body.resourceMetrics[0].scopeMetrics[0].metrics;
+      const requestMetric = allMetrics.find((m) => m.name === 'request' && m.gauge.dataPoints[0].attributes.some((a) => a.key === 'category' && a.value.stringValue === 'total'));
+      expect(requestMetric.gauge.dataPoints[0].asDouble).toBe(5);
     });
 
     test('handles errors in periodic sending', () => {

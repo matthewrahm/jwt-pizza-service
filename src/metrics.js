@@ -152,28 +152,25 @@ class Metrics {
         this.purchaseMetrics(buf);
         this.latencyMetrics(buf);
 
-        const metrics = buf.toString('\n');
-        this.sendMetricsToGrafana(metrics);
+        this.sendMetricsToGrafana(buf.toJSON());
       } catch (error) {
         console.log('Error sending metrics', error);
       }
     }, period);
   }
 
-  sendMetricsToGrafana(metrics) {
+  sendMetricsToGrafana(metricData) {
     if (!config.metrics || !config.metrics.apiKey) {
       return;
     }
 
-    const body = metrics;
-
     fetch(config.metrics.endpointUrl, {
       method: 'POST',
       headers: {
-        'Content-Type': 'text/plain',
-        Authorization: `Bearer ${config.metrics.accountId}:${config.metrics.apiKey}`,
+        'Content-Type': 'application/json',
+        Authorization: `Basic ${Buffer.from(`${config.metrics.accountId}:${config.metrics.apiKey}`).toString('base64')}`,
       },
-      body: body,
+      body: JSON.stringify(metricData),
     })
       .then((response) => {
         if (!response.ok) {
@@ -193,11 +190,36 @@ class MetricBuilder {
 
   addMetric(prefix, category, type, value) {
     const source = config.metrics?.source || 'jwt-pizza-service';
-    this.metrics.push(`${prefix},source=${source},category=${category},type=${type} value=${value}`);
+    this.metrics.push({
+      name: prefix,
+      gauge: {
+        dataPoints: [
+          {
+            asDouble: parseFloat(value),
+            timeUnixNano: String(Date.now() * 1000000),
+            attributes: [
+              { key: 'source', value: { stringValue: source } },
+              { key: 'category', value: { stringValue: category } },
+              { key: 'type', value: { stringValue: type } },
+            ],
+          },
+        ],
+      },
+    });
   }
 
-  toString(separator = '\n') {
-    return this.metrics.join(separator);
+  toJSON() {
+    return {
+      resourceMetrics: [
+        {
+          scopeMetrics: [
+            {
+              metrics: this.metrics,
+            },
+          ],
+        },
+      ],
+    };
   }
 }
 

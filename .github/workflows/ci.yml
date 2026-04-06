@@ -57,9 +57,9 @@ jobs:
             },
             metrics: {
               source: 'jwt-pizza-service-test',
-              endpointUrl: '${{ secrets.METRICS_ENDPOINT_URL }}',
+              endpointUrl: 'https://otlp-gateway-prod-us-west-0.grafana.net/otlp/v1/metrics',
               apiKey: '${{ secrets.METRICS_API_KEY }}',
-              accountId: '${{ secrets.METRICS_ACCOUNT_ID }}',
+              accountId: '1584523',
             },
           };" > src/config.js
 
@@ -128,9 +128,9 @@ jobs:
             },
             metrics: {
               source: 'jwt-pizza-service',
-              endpointUrl: '${{ secrets.METRICS_ENDPOINT_URL }}',
+              endpointUrl: 'https://otlp-gateway-prod-us-west-0.grafana.net/otlp/v1/metrics',
               apiKey: '${{ secrets.METRICS_API_KEY }}',
-              accountId: '${{ secrets.METRICS_ACCOUNT_ID }}',
+              accountId: '1584523',
             },
           };" > src/config.js
 
