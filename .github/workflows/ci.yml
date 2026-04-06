@@ -61,6 +61,12 @@ jobs:
               apiKey: '${{ secrets.METRICS_API_KEY }}',
               accountId: '1584523',
             },
+            logging: {
+              source: 'jwt-pizza-service-test',
+              endpointUrl: 'https://logs-prod-021.grafana.net',
+              accountId: '1542312',
+              apiKey: '${{ secrets.LOGGING_API_KEY }}',
+            },
           };" > src/config.js
 
       - name: Tests
@@ -131,6 +137,12 @@ jobs:
               endpointUrl: 'https://otlp-gateway-prod-us-west-0.grafana.net/otlp/v1/metrics',
               apiKey: '${{ secrets.METRICS_API_KEY }}',
               accountId: '1584523',
+            },
+            logging: {
+              source: 'jwt-pizza-service',
+              endpointUrl: 'https://logs-prod-021.grafana.net',
+              accountId: '1542312',
+              apiKey: '${{ secrets.LOGGING_API_KEY }}',
             },
           };" > src/config.js
 

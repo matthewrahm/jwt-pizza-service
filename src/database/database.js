@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const config = require('../config.js');
 const { StatusCodeError } = require('../endpointHelper.js');
 const { Role } = require('../model/model.js');
+const logger = require('../logger.js');
 const dbModel = require('./dbModel.js');
 class DB {
   constructor() {
@@ -343,6 +344,7 @@ class DB {
   }
 
   async query(connection, sql, params) {
+    logger.dbLogger(sql);
     const [results] = await connection.execute(sql, params);
     return results;
   }
