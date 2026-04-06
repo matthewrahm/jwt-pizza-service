@@ -171,7 +171,7 @@ class Metrics {
       method: 'POST',
       headers: {
         'Content-Type': 'text/plain',
-        Authorization: `Bearer ${config.metrics.accountId}:${config.metrics.apiKey}`,
+        Authorization: `Basic ${Buffer.from(`${config.metrics.accountId}:${config.metrics.apiKey}`).toString('base64')}`,
       },
       body: body,
     })
