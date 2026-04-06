@@ -283,7 +283,7 @@ describe('Metrics', () => {
           method: 'POST',
           body: 'test_metric value=1',
           headers: expect.objectContaining({
-            Authorization: `Basic ${Buffer.from('test-account-id:test-api-key').toString('base64')}`,
+            Authorization: 'Bearer test-account-id:test-api-key',
           }),
         })
       );
