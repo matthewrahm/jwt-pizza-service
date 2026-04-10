@@ -1,11 +1,18 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
+const rateLimit = require('express-rate-limit');
 const config = require('../config.js');
 const { asyncHandler } = require('../endpointHelper.js');
 const { DB, Role } = require('../database/database.js');
 const metrics = require('../metrics.js');
 
 const authRouter = express.Router();
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { message: 'Too many attempts, please try again later' },
+});
 
 authRouter.docs = [
   {
@@ -19,8 +26,8 @@ authRouter.docs = [
     method: 'PUT',
     path: '/api/auth',
     description: 'Login existing user',
-    example: `curl -X PUT localhost:3000/api/auth -d '{"email":"a@jwt.com", "password":"admin"}' -H 'Content-Type: application/json'`,
-    response: { user: { id: 1, name: '常用名字', email: 'a@jwt.com', roles: [{ role: 'admin' }] }, token: 'tttttt' },
+    example: `curl -X PUT localhost:3000/api/auth -d '{"email":"d@jwt.com", "password":"diner"}' -H 'Content-Type: application/json'`,
+    response: { user: { id: 2, name: 'pizza diner', email: 'd@jwt.com', roles: [{ role: 'diner' }] }, token: 'tttttt' },
   },
   {
     method: 'DELETE',
@@ -76,6 +83,7 @@ authRouter.post(
 // login
 authRouter.put(
   '/',
+  authLimiter,
   asyncHandler(async (req, res) => {
     const { email, password } = req.body;
     try {
@@ -103,7 +111,7 @@ authRouter.delete(
 );
 
 async function setAuth(user) {
-  const token = jwt.sign(user, config.jwtSecret);
+  const token = jwt.sign(user, config.jwtSecret, { expiresIn: '1h' });
   await DB.loginUser(user.id, token);
   return token;
 }
